@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 
 from ..database import db
-from ..models import Post
+from ..models import Post, Tag
+from .helpers import tags_from_form
 
 posts = Blueprint("posts", __name__)
 
@@ -26,11 +27,13 @@ def create():
     if request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
+        tag_names = tags_from_form(request.form)
 
         if not title:
             flash("Title is required!")
         else:
             new_post = Post(title=title, content=content)
+            new_post.tags = Tag.find_or_add_tags_by_name(tag_names)
 
             db.session.add(new_post)
             db.session.commit()
@@ -48,10 +51,12 @@ def edit(post_id):
     if request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
+        tag_names = tags_from_form(request.form)
 
         if not title:
             flash("Title is required!")
         else:
+            post.tags = Tag.find_or_add_tags_by_name(tag_names)
             post.title = title
             post.content = content
 
