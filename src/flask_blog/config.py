@@ -3,6 +3,7 @@ import logging
 import os
 
 from flask import cli, current_app
+from .template_filters import querystring_active, querystring_toggler
 
 
 def load_envvars(app):
@@ -35,3 +36,6 @@ def configure_app(app, import_name=None, config=None):
 
     logger_level = getattr(logging, app.config["LOGGER_LEVEL"].upper())
     app.logger.setLevel(logger_level)
+
+    app.jinja_env.filters["querystring_active"] = querystring_active
+    app.jinja_env.filters["querystring_toggler"] = querystring_toggler

@@ -1,6 +1,33 @@
 {% extends 'base.html' %} 
 {% block content %}
+  <div class="text-center">
   <h1>{% block title %} Welcome to FlaskBlog {% endblock %}</h1>
+  {% if tags %}
+    <div class="dropdown d-inline">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_tags_filter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Filter posts by tag
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdown_tags_filter">
+        {% for tag in tags %}
+          <a class="dropdown-item {% if existing_querystring_dict|querystring_active('tag', tag.name) %}active{% endif %}" href="/?{{ existing_querystring_dict|querystring_toggler('tag', tag.name) }}">{{ tag.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+  {% if dates %}
+    <div class="dropdown d-inline">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdown_date_filter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Filter posts by date
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdown_date_filter">
+        {% for date in dates %}
+          <a class="dropdown-item {% if existing_querystring_dict|querystring_active('date', date) %}active{% endif %}" href="/?{{ existing_querystring_dict|querystring_toggler('date', date) }}">{{ date }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+  </div>
+  <br>
   {% if not posts %}<p>No posts here so far.</p>{% endif %}
   {% for post in posts %}
     <a href="{{ url_for('posts.post', post_id=post.id) }}">

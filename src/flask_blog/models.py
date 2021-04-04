@@ -38,7 +38,7 @@ class Tag(db.Model):
         return value.strip().lower()
 
     @classmethod
-    def find_or_add_tags_by_name(self, tag_names):
+    def find_or_add_tags_by_name(cls, tag_names):
         tags = set()
         for tag_name in tag_names:
             try:
@@ -51,7 +51,7 @@ class Tag(db.Model):
                 # within same session if they have not been committed
                 # maybe I should fix this?
                 db.session.rollback()
-                tags.add(self.query.filter_by(name=tag_name).one())
+                tags.add(cls.query.filter_by(name=tag_name).one())
         return list(tags)
 
 
