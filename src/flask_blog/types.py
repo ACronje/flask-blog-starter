@@ -1,4 +1,4 @@
-from graphene import relay
+from graphene import relay, List, String
 from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
 
 from . import models
@@ -16,7 +16,24 @@ class PostNode(SQLAlchemyObjectType):
         model = models.Post
         connection_field_factory = connection_field_factory
 
+    tag_names = List(String)
+
+    def resolve_tag_names(post, info):
+        return post.tag_names
+
+
+class TagNode(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node,)
+        model = models.Tag
+        connection_field_factory = connection_field_factory
+
 
 class PostConnection(relay.Connection):
     class Meta:
         node = PostNode
+
+
+class TagConnection(relay.Connection):
+    class Meta:
+        node = TagNode

@@ -83,6 +83,73 @@ To fetch all posts execute the following query in GraphiQL:
 }
 ```
 
+### Filter posts by tag name and creation date
+
+To filter posts by tag name and/or creation date, execute the following query in GraphiQL:
+
+```
+{
+  posts(tagName: "tech", date: "2021-04-04") {
+    edges {
+      node {
+        id
+        title
+        content
+        createdAt
+        tagNames
+      }
+    }
+  }
+}
+```
+Note that the date must be in iso8601 format.
+
+### Update a post
+
+To update a post, execute the following mutation in GraphiQL:
+
+```
+mutation {
+  updatePost(input: {id: "UG9zdE5vZGU6MTY=", title: "Post apoca lyptic", content: "such content", tagNames: ["tech", "software"]})
+  {
+    __typename
+    ... on UpdatePostSuccess {
+      post {
+        id
+        title
+        content
+        tagNames
+      }
+    }
+    ... on UpdatePostFailed {
+      reason
+    }
+  }
+}
+```
+Note that this method does not support patching a post record, so all fields must be sent across.
+
+### Delete a post
+
+To delete a post, execute the following mutation in GraphiQL:
+
+```
+mutation {
+  deletePost(input: {id: "UG9zdE5vZGU6NA=="})
+  {
+    __typename
+    ... on DeletePostSuccess {
+      post {
+        id
+      }
+    }
+    ... on DeletePostFailed {
+      reason
+    }
+  }
+}
+```
+
 ## What you need to do
 
 We need you to take this sample project, fork the repository, and add some extra features.

@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 
 from ..database import db
 from ..models import Post, Tag, posttags_table
-from .helpers import (
+from ..helpers import (
     tags_from_form,
     parse_date_or_none,
     convert_date_to_iso8601_string,
