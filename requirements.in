@@ -1,11 +1,12 @@
 flask
 flask-cors
 flask-graphql
+flask-graphql-auth
 flask-login
 graphene
 flask-migrate
 flask-sqlalchemy
 graphene-sqlalchemy
-pyjwt
+pyjwt==1.7.1
 python-dotenv
 sqlalchemy

@@ -41,6 +41,8 @@ class Query(graphene.ObjectType):
 
 
 class Mutation(graphene.ObjectType):
+    auth = mutations.AuthMutation.Field()
+    refresh = mutations.RefreshMutation.Field()
     create_post = mutations.CreatePost.Field()
     update_post = mutations.UpdatePost.Field()
     delete_post = mutations.DeletePost.Field()

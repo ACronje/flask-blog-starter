@@ -1,12 +1,14 @@
 import graphene
 from graphene import relay
 from graphql_relay.node.node import from_global_id
+from flask_graphql_auth import AuthInfoField, mutation_jwt_required
 
 from .. import models, types
 from ..database import db
 
 
 class CreatePostInput:
+    token = graphene.String(required=True)
     title = graphene.String(required=True)
     content = graphene.String(required=True)
     tag_names = graphene.List(graphene.String, required=False)
@@ -18,7 +20,17 @@ class CreatePostSuccess(graphene.ObjectType):
 
 class CreatePostOutput(graphene.Union):
     class Meta:
-        types = (CreatePostSuccess,)
+        types = (
+            CreatePostSuccess,
+            AuthInfoField,
+        )
+
+    @classmethod
+    def resolve_type(cls, instance, info):
+        instance_type = type(instance)
+        if instance_type.__name__ == "CreatePost":
+            return AuthInfoField
+        return instance_type
 
 
 class CreatePost(relay.ClientIDMutation):
@@ -26,6 +38,7 @@ class CreatePost(relay.ClientIDMutation):
     Output = CreatePostOutput
 
     @classmethod
+    @mutation_jwt_required
     def mutate_and_get_payload(cls, root, info, tag_names=None, **input):
         new_post = models.Post(**input)
         if tag_names is None:
@@ -39,6 +52,7 @@ class CreatePost(relay.ClientIDMutation):
 
 
 class UpdatePostInput:
+    token = graphene.String(required=True)
     id = graphene.ID(required=True)
     title = graphene.String(required=True)
     content = graphene.String(required=True)
@@ -58,7 +72,17 @@ class UpdatePostOutput(graphene.Union):
         types = (
             UpdatePostSuccess,
             UpdatePostFailed,
+            AuthInfoField,
         )
+
+    @classmethod
+    def resolve_type(cls, instance, info):
+        # this is really just a hack to deal with the poor error handling from the 3rd party lib
+        # given more time I would have found a better lib or written my own
+        instance_type = type(instance)
+        if instance_type.__name__ == "UpdatePost":
+            return AuthInfoField
+        return instance_type
 
 
 class UpdatePost(relay.ClientIDMutation):
@@ -66,6 +90,7 @@ class UpdatePost(relay.ClientIDMutation):
     Output = UpdatePostOutput
 
     @classmethod
+    @mutation_jwt_required
     def mutate_and_get_payload(cls, root, info, **input):
         id = from_global_id(input["id"])[-1]
         post = models.Post.query.get(id)
@@ -83,6 +108,7 @@ class UpdatePost(relay.ClientIDMutation):
 
 
 class DeletePostInput:
+    token = graphene.String(required=True)
     id = graphene.ID(required=True)
 
 
@@ -99,7 +125,15 @@ class DeletePostOutput(graphene.Union):
         types = (
             DeletePostSuccess,
             DeletePostFailed,
+            AuthInfoField,
         )
+
+    @classmethod
+    def resolve_type(cls, instance, info):
+        instance_type = type(instance)
+        if instance_type.__name__ == "DeletePost":
+            return AuthInfoField
+        return instance_type
 
 
 class DeletePost(relay.ClientIDMutation):
@@ -107,6 +141,7 @@ class DeletePost(relay.ClientIDMutation):
     Output = DeletePostOutput
 
     @classmethod
+    @mutation_jwt_required
     def mutate_and_get_payload(cls, root, info, **input):
         id = from_global_id(input["id"])[-1]
         post = models.Post.query.get(id)

@@ -6,4 +6,6 @@ SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/flask_blog.db"
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-JWT_SECRET = "my_jwt_secret"
+JWT_SECRET_KEY = "superdupersecret"
+REFRESH_EXP_LENGTH = 300
+ACCESS_EXP_LENGTH = 100

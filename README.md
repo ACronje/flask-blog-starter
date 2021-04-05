@@ -40,30 +40,6 @@ make test
 
 This starter features a GraphQL API built with [graphene](https://github.com/graphql-python/graphene). To access the GraphiQL of your running server navigate to [http://127.0.0.1:5000/graphql](http://127.0.0.1:5000/graphql) in your browser.
 
-### Create a new post
-
-To create a new post via the GraphQL API execute the following mutation in GraphiQL:
-
-```
-mutation {
-  createPost (input: {
-    title: "Test Post"
-    content: "Test content"
-  }) {
-    __typename
-    ... on CreatePostSuccess {
-      post {
-        id
-        title
-        content
-        createdAt
-        updatedAt
-      }
-    }
-  }
-}
-```
-
 ### Fetch all posts
 
 To fetch all posts execute the following query in GraphiQL:
@@ -104,14 +80,66 @@ To filter posts by tag name and/or creation date, execute the following query in
 ```
 Note that the date must be in iso8601 format.
 
+### Authenticating against the graphql CUD mutations
+
+The graphql post Create, Update, and Delete mutations require you to authenticate using a JWT token.
+You will first need to register as a user through the web app and then use your username and password to fetch a JWT token (accessToken in the payload below) as follows:
+
+```
+mutation {
+   auth(password: "password", username: "johno") {
+    __typename
+    ... on AuthMutationSuccess {
+      accessToken
+      refreshToken
+    }
+    ... on AuthMutationFailed {
+      reason
+    }
+   }
+}
+```
+
+### Create a new post
+
+To create a new post via the GraphQL API execute the following mutation in GraphiQL:
+
+```
+mutation {
+  createPost (input: {
+    token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNjE3NjQ3MjYzLCJuYmYiOjE2MTc2NDcyNjMsImp0aSI6IjMyODFiMGFhLTY3NGUtNDc2ZC04YTkzLWVmOTZiMjA0MTQyZiIsImlkZW50aXR5IjoiYXJub3V4IiwiZXhwIjoxNjE3NjQ4MTYzfQ.ruWw6GZxu4l2nnAC77Cf9MN7jLAiNbtcqjio9WD70Tc"
+    title: "Test Post"
+    content: "Test content"
+  }) {
+    __typename
+    ... on CreatePostSuccess {
+      post {
+        id
+        title
+        content
+        createdAt
+        updatedAt
+      }
+    }
+    ... on AuthInfoField {
+      message
+    }
+  }
+}
+```
 ### Update a post
 
 To update a post, execute the following mutation in GraphiQL:
 
 ```
 mutation {
-  updatePost(input: {id: "UG9zdE5vZGU6MTY=", title: "Post apoca lyptic", content: "such content", tagNames: ["tech", "software"]})
-  {
+  updatePost(input: {
+    token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNjE3NjQ3MjYzLCJuYmYiOjE2MTc2NDcyNjMsImp0aSI6IjMyODFiMGFhLTY3NGUtNDc2ZC04YTkzLWVmOTZiMjA0MTQyZiIsImlkZW50aXR5IjoiYXJub3V4IiwiZXhwIjoxNjE3NjQ4MTYzfQ.ruWw6GZxu4l2nnAC77Cf9MN7jLAiNbtcqjio9WD70Tc"
+    id: "UG9zdE5vZGU6MTY="
+    title: "Post apoca lyptic"
+    content: "such content"
+    tagNames: ["tech", "software"]
+  }) {
     __typename
     ... on UpdatePostSuccess {
       post {
@@ -124,6 +152,9 @@ mutation {
     ... on UpdatePostFailed {
       reason
     }
+    ... on AuthInfoField {
+      message
+		}
   }
 }
 ```
@@ -135,8 +166,10 @@ To delete a post, execute the following mutation in GraphiQL:
 
 ```
 mutation {
-  deletePost(input: {id: "UG9zdE5vZGU6NA=="})
-  {
+  deletePost(input: {
+    token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNjE3NjQ3MjYzLCJuYmYiOjE2MTc2NDcyNjMsImp0aSI6IjMyODFiMGFhLTY3NGUtNDc2ZC04YTkzLWVmOTZiMjA0MTQyZiIsImlkZW50aXR5IjoiYXJub3V4IiwiZXhwIjoxNjE3NjQ4MTYzfQ.ruWw6GZxu4l2nnAC77Cf9MN7jLAiNbtcqjio9WD70Tc" 
+    id: "UG9zdE5vZGU6MjI="
+  }) {
     __typename
     ... on DeletePostSuccess {
       post {
@@ -146,6 +179,9 @@ mutation {
     ... on DeletePostFailed {
       reason
     }
+		... on AuthInfoField {
+		message
+		}
   }
 }
 ```

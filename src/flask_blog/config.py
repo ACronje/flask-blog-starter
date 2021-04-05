@@ -4,6 +4,8 @@ import os
 
 from flask import cli, current_app
 from flask_login import LoginManager
+from flask_graphql_auth import GraphQLAuth
+
 from .template_filters import querystring_active, querystring_toggler
 
 
@@ -43,6 +45,8 @@ def configure_app(app, import_name=None, config=None):
 
     login_manager.init_app(app)
     login_manager.login_view = "posts.login"
+
+    GraphQLAuth(app)
 
     app.jinja_env.filters["querystring_active"] = querystring_active
     app.jinja_env.filters["querystring_toggler"] = querystring_toggler
