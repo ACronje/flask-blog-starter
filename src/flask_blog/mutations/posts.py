@@ -27,8 +27,12 @@ class CreatePostOutput(graphene.Union):
 
     @classmethod
     def resolve_type(cls, instance, info):
+        # this is really just a hack to deal with the poor error handling
+        # from the 3rd party lib resulting in resolving to the wrong
+        # type (i.e. CreatePostPayload)
+        # given more time I would have found a better lib or written my own
         instance_type = type(instance)
-        if instance_type.__name__ == "CreatePost":
+        if instance_type.__name__ not in ["CreatePostSuccess"]:
             return AuthInfoField
         return instance_type
 
@@ -77,10 +81,11 @@ class UpdatePostOutput(graphene.Union):
 
     @classmethod
     def resolve_type(cls, instance, info):
-        # this is really just a hack to deal with the poor error handling from the 3rd party lib
-        # given more time I would have found a better lib or written my own
         instance_type = type(instance)
-        if instance_type.__name__ == "UpdatePost":
+        if instance_type.__name__ not in [
+            "UpdatePostSuccess",
+            "UpdatePostFailed",
+        ]:
             return AuthInfoField
         return instance_type
 
@@ -131,7 +136,10 @@ class DeletePostOutput(graphene.Union):
     @classmethod
     def resolve_type(cls, instance, info):
         instance_type = type(instance)
-        if instance_type.__name__ == "DeletePost":
+        if instance_type.__name__ not in [
+            "DeletePostSuccess",
+            "DeletePostFailed",
+        ]:
             return AuthInfoField
         return instance_type
 

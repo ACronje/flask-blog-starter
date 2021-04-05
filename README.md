@@ -179,9 +179,9 @@ mutation {
     ... on DeletePostFailed {
       reason
     }
-		... on AuthInfoField {
-		message
-		}
+    ... on AuthInfoField {
+      message
+    }
   }
 }
 ```
@@ -192,17 +192,24 @@ We need you to take this sample project, fork the repository, and add some extra
 
 ### Key goals and deliverables
 
-- We would like to be able to tag posts by associating zero or more tags with a single post.
-- We would like to filter the list of posts by tag.
-- We would like to filter posts by the date they were created.
-- Some of our client consume the blog content via the GraphQL API. Currently they can only list and create posts, but have asked for the ability to edit and delete posts.
-- We would also like to filter posts by tag and creation date via the GraphQL API.
+- We would like to be able to tag posts by associating zero or more tags with a single post. (DONE)
+- We would like to filter the list of posts by tag. (DONE)
+- We would like to filter posts by the date they were created. (DONE)
+- Some of our client consume the blog content via the GraphQL API. Currently they can only list and create posts, but have asked for the ability to edit and delete posts. (DONE)
+- We would also like to filter posts by tag and creation date via the GraphQL API. (DONE)
 
 **Bonus points**
 
-- Implement user authentication (consider using [Flask-Login](https://flask-login.readthedocs.io/en/latest/))
-- Deploy the project in AWS, Azure or GCP
-- Add unit tests for the new features
+- Implement user authentication (consider using [Flask-Login](https://flask-login.readthedocs.io/en/latest/)) (DONE)
+- Deploy the project in AWS, Azure or GCP (DONE)
+- Add unit tests for the new features (PARTIALLY DONE)
+
+### Notes and observations from the dev
+
+- The app has been deployed to an AWS EC2 instance and is available at: http://13.244.151.180:5000/
+- The way that I have written the SQL query for filtering posts by creation date, and also the SQL query I wrote to expose the unique creation dates in the UI are very inefficient as I am using the SQL DATE function to cast the created_at datetime column to a date, resulting in the entire table needing to be scanned. I went on the assumption that the number of post records will stay small (at most a few thousand) and so performance would never be an issue. But if they were to grow to the tens of thousands or more, then we could optimise this by for example introducing a new table that stores only unique creation date values (using a unique index) and links back to the post through a joining table. We could then register an event handler on the posts model which would create and/or link the creation date table record to the post record automatically after the post record is created. Of course this is only one of many ways to solve this problem.
+- I could not figure out how to turn my SQLAlchemy queries into reusable / chainable queries so they ended up living in the views where they are used. This is definitely not ideal as I feel that views should be for parsing params, passing them to methods that know how to run the business logic, and then serializing payloads. I found hybrid properties in the SQLAlchemy docs, and it looked promising, but then I realised it would not work for joins. With more time I would have worked on a solution that allows me to create a SQLAlchemy equivalent of Ruby on Rails' Active Record named scopes and then moved all these queries out of the views.
+- I have not worked in Python for a few years now, and this was my first time to work with GraphQL. It was quite a learning experience! It was very tricky to find good examples online of what I wanted to achieve, and a lot of what I came across felt like hacky or incomplete solutions. I have definitely been spoilt by the Ruby and Rails communities.
 
 ### Dependencies and tools
 
