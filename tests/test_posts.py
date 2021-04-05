@@ -10,12 +10,22 @@ from flask_blog.database import db
 NO_POSTS_MESSAGE = b"No posts here so far."
 
 
+def authenticate_user_for_client(client):
+    user = models.User(username="john")
+    user.set_password("super")
+    db.session.add(user)
+    db.session.commit()
+    client.post('/login', data=dict(username="john", password="super"))
+
+
 def test_empty_db(client):
     rv = client.get("/")
     assert NO_POSTS_MESSAGE in rv.data
 
 
 def test_create_post(app_context, client):
+    authenticate_user_for_client(client)
+
     title = "Test Post"
     content = "This is a test"
     rv = client.post(
@@ -43,6 +53,8 @@ def test_create_post(app_context, client):
 
 
 def test_edit_post(app_context, client):
+    authenticate_user_for_client(client)
+
     post = models.Post(title="Test Post", content="This is a test")
 
     db.session.add(post)
@@ -70,6 +82,8 @@ def test_edit_post(app_context, client):
 
 
 def test_delete_post(app_context, client):
+    authenticate_user_for_client(client)
+
     post = models.Post(title="Test Post", content="This is a test")
 
     db.session.add(post)

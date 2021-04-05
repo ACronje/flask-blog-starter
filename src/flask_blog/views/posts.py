@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 from sqlalchemy.sql import func
+from sqlalchemy.exc import IntegrityError
+from flask_login import current_user, login_user, logout_user, login_required
 
 from ..database import db
-from ..models import Post, Tag, posttags_table
+from ..models import Post, Tag, posttags_table, User
 from ..helpers import (
     tags_from_form,
     parse_date_or_none,
@@ -11,6 +13,59 @@ from ..helpers import (
 )
 
 posts = Blueprint("posts", __name__)
+
+
+@posts.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("posts.index"))
+
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if not username or not password:
+            flash("Username and password required")
+        else:
+            user = User(username=username)
+            user.set_password(password)
+            db.session.add(user)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                # username already taken
+                db.session.rollback()
+            flash("A user has been created for you if one did not exist")
+            return redirect(url_for("posts.login"))
+    return render_template("register.html")
+
+
+@posts.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("posts.index"))
+
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if not username or not password:
+            flash("Username and password required")
+        else:
+            user = User.query.filter_by(username=username).first()
+            if user is None or not user.check_password(password):
+                flash("Invalid username or password")
+                return redirect(url_for("posts.login"))
+            login_user(user)
+            flash("Login successful!")
+            return redirect(url_for("posts.index"))
+    return render_template("login.html")
+
+
+@posts.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("posts.index"))
 
 
 @posts.route("/")
@@ -60,6 +115,7 @@ def post(post_id):
 
 
 @posts.route("/create", methods=("GET", "POST"))
+@login_required
 def create():
     if request.method == "POST":
         title = request.form["title"]
@@ -80,6 +136,7 @@ def create():
 
 
 @posts.route("/<int:post_id>/edit", methods=("GET", "POST"))
+@login_required
 def edit(post_id):
     post = Post.query.get(post_id)
     if not post:
@@ -105,6 +162,7 @@ def edit(post_id):
 
 
 @posts.route("/<int:post_id>/delete", methods=("POST",))
+@login_required
 def delete(post_id):
     post = Post.query.get(post_id)
     if not post:

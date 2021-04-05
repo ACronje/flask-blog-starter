@@ -14,6 +14,8 @@ flask-cors==3.0.10
     # via -r requirements.in
 flask-graphql==2.0.1
     # via -r requirements.in
+flask-login==0.5.0
+    # via -r requirements.in
 flask-migrate==2.7.0
     # via -r requirements.in
 flask-sqlalchemy==2.5.1
@@ -25,6 +27,7 @@ flask==1.1.2
     #   -r requirements.in
     #   flask-cors
     #   flask-graphql
+    #   flask-login
     #   flask-migrate
     #   flask-sqlalchemy
 graphene-sqlalchemy==2.3.0
